@@ -1,7 +1,7 @@
 <?php
-namespace {{BPREPLACENAMESPACE}};
+namespace AcfPhoneNumberField;
 
-use {{BPREPLACENAMESPACE}}\App;
+use AcfPhoneNumberField\App;
 
 use Brain\Monkey\Functions;
 use Mockery;
@@ -12,14 +12,14 @@ class AppTest extends \PluginTestCase\PluginTestCase
     {
         new App();
     
-        self::assertNotFalse(has_action('admin_enqueue_scripts', '{{BPREPLACENAMESPACE}}\App->enqueueStyles()'));
-        self::assertNotFalse(has_action('admin_enqueue_scripts', '{{BPREPLACENAMESPACE}}\App->enqueueScripts()'));
+        self::assertNotFalse(has_action('admin_enqueue_scripts', 'AcfPhoneNumberField\App->enqueueStyles()'));
+        self::assertNotFalse(has_action('admin_enqueue_scripts', 'AcfPhoneNumberField\App->enqueueScripts()'));
     }
 
     public function testEnqueueStyles()
     {
         Functions\expect('wp_register_style')->once();
-        Functions\expect('wp_enqueue_style')->once()->with('{{BPREPLACESLUG}}-css');
+        Functions\expect('wp_enqueue_style')->once()->with('acf-phone-number-field-css');
 
         $app = new App();
 
@@ -29,7 +29,7 @@ class AppTest extends \PluginTestCase\PluginTestCase
     public function testEnqueueScripts()
     {
         Functions\expect('wp_register_script')->once();
-        Functions\expect('wp_enqueue_script')->once()->with('{{BPREPLACESLUG}}-js');
+        Functions\expect('wp_enqueue_script')->once()->with('acf-phone-number-field-js');
 
         $app = new App();
 

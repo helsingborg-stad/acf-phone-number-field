@@ -1,18 +1,18 @@
 {
-    "name": "{{BPREPLACESLUG}}",
+    "name": "acf-phone-number-field",
     "version": "1.0.0",
-    "description": "{{BPREPLACEDESCRIPTION}}",
+    "description": "A phone number field for Advanced Custom Fields.",
     "main": "",
     "repository": {
         "type": "git",
-        "url": "https://github.com/{{BPREPLACEGITHUB}}/{{BPREPLACESLUG}}"
+        "url": "https://github.com/helsingborg-stad/acf-phone-number-field"
     },
-    "author": "{{BPREPLACEAUTHOR}}",
+    "author": "Nikolas Ramstedt",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/{{BPREPLACEGITHUB}}/{{BPREPLACESLUG}}/issues"
+        "url": "https://github.com/helsingborg-stad/acf-phone-number-field/issues"
     },
-    "homepage": "https://github.com/{{BPREPLACEGITHUB}}/{{BPREPLACESLUG}}",
+    "homepage": "https://github.com/helsingborg-stad/acf-phone-number-field",
     "scripts": {
         "test": "jest --coverage --maxWorkers=50%",
         "dev": "vite",
