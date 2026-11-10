@@ -1,119 +1,70 @@
-<!-- SHIELDS -->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![License][license-shield]][license-url]
+# ACF Phone Number Field
 
-<h3>ACF Phone Number Field</h3>
-<p>
-  A phone number field for Advanced Custom Fields.
-  <br />
-  <a href="https://github.com/helsingborg-stad/acf-phone-number-field/issues">Report Bug</a>
-  ·
-  <a href="https://github.com/helsingborg-stad/acf-phone-number-field/issues">Request Feature</a>
-</p>
+PHP/ACF plugin under development. The repository provides a local PHP test foundation; the production phone field is not implemented. Do not deploy this setup as a finished phone-field plugin.
 
-## Table of Contents
-- [Table of Contents](#table-of-contents)
-- [About ACF Phone Number Field](#about-ACF Phone Number Field)
-  - [Built With](#built-with)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Usage](#usage)
-- [Deploy](#deploy)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
-- [Acknowledgements](#acknowledgements)
+## Requirements
 
-## About ACF Phone Number Field
+- PHP 8.3+ with curl, dom, mbstring, mysqli, xml and xmlwriter.
+- Composer 2, curl CLI and tar.
+- MariaDB for integration tests only.
 
-[![ACF Phone Number Field Screen Shot][product-screenshot]](https://example.com)
+PHP tests require no Node, Docker, web server or IDE. `package.json` and its lockfile are placeholders for future browser-test tooling; there is no frontend build.
 
-Here's a blank template to get started:
+The first verified matrix is PHP 8.3.36, PHPUnit 9.6.38, Polyfills 1.1.5, WordPress 7.1.4, ACF Free 6.8.11, libphonenumber 9.0.43 and MariaDB 12.3.2. Mago is pinned to 1.59.0. Other supported PHP versions are not yet verified.
 
-### Built With
+## Install and test
 
-* PHP
-* NPM
-* Webpack
-* Modularity
-
-## Getting Started
-
-To get a local copy up and running follow these simple steps.
-
-### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them (mac os).
-* composer
-```sh
-brew install composer
-```
-* npm
-```sh
-brew install node
-```
-### Installation
-
-1. Clone the repo
-```sh
-git clone https://github.com/helsingborg-stad/acf-phone-number-field.git
-```
-2. Install and build NPM packages
-```sh
-npm install && npm run build
-```
-3. Install composer packages
 ```sh
 composer install
+composer test
+composer setup:tests
+composer lint
 ```
 
-## Usage
+`composer test` and `composer test:unit` run behavior tests without WordPress or a database. `composer setup:tests` downloads checksum-verified WordPress and ACF archives to `.cache/tests/`; it does not change a database.
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+`composer lint` runs Mago linting and static analysis on the plugin and tests. Run `composer setup:tests` first so the analyzer can resolve WordPress/ACF symbols. Mago's Composer launcher downloads its platform binary on first use, so initial execution requires GitHub Releases access.
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+Use `composer format` to format PHP.
 
-## Deploy
+## Integration database
 
-Instructions for deploys.
+Create a dedicated disposable database and a separate password-protected test account. Grant that account privileges on the test database. Exclusive access is not required: inherited PUBLIC rights on `test` and `test_%` are accepted for the local environment. Tests must still use only the designated database.
 
-## Roadmap
+Keep the connection in a private INI file outside version control with permissions 0600:
 
-See the [open issues][issues-url] for a list of proposed features (and known issues).
+```ini
+[client]
+host=127.0.0.1
+port=3306
+user=YOUR_TEST_ACCOUNT
+password="YOUR_TEST_PASSWORD"
+database=YOUR_DISPOSABLE_DATABASE
+```
 
-## Contributing
+**The WordPress harness can delete and recreate test tables. Never use an existing site database.** The configured test-table prefix is `acf_phone_tests_`.
 
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+```sh
+export ACF_TEST_DB_CONFIG=/absolute/path/to/private-client.ini
+export ACF_TEST_DB_CONFIRM=YOUR_DISPOSABLE_DATABASE
+composer test:integration
+composer test:all
+```
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+The bootstrap rejects missing or malformed configuration, an administrator named `root`, and a confirmation that does not exactly match the configured database name. It does not provision databases or alter grants.
+
+`composer test:integration` runs two separate PHP processes: the unmodified WordPress lifecycle without ACF, then real ACF registration, E.164 save/read behavior and teardown. The E.164 implementation is a minimal test-only field, not the production phone-field contract.
+
+Optional `WP_TESTS_DIR` points to `tests/phpunit` in a full wordpress-develop checkout; optional `ACF_PLUGIN_FILE` points to ACF's `acf.php`.
+
+## CI and scope
+
+`.github/workflows/tests.yml` configures pull-request checks using the same Composer commands and a disposable MariaDB service. The service container runs on GitHub; local verification uses native PHP/MariaDB.
+
+A hosted Actions run is still required to verify the runner, service image and Actions environment. Devcontainer verification, browser tests, ACF Pro, MU-loader verification and release packaging are deferred.
+
+The official WordPress harness failed under PHPUnit 11 and 12 because it calls the removed `parseTestMethodAnnotations()` method. PHPUnit 9.6 / Polyfills 1.x passed the real lifecycle without a compatibility adapter or upstream patches.
 
 ## License
 
-Distributed under the [MIT License][license-url].
-
-## Acknowledgements
-
-- [othneildrew Best README Template](https://github.com/othneildrew/Best-README-Template)
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/helsingborg-stad/acf-phone-number-field.svg?style=flat-square
-[contributors-url]: https://github.com/helsingborg-stad/acf-phone-number-field/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/helsingborg-stad/acf-phone-number-field.svg?style=flat-square
-[forks-url]: https://github.com/helsingborg-stad/acf-phone-number-field/network/members
-[stars-shield]: https://img.shields.io/github/stars/helsingborg-stad/acf-phone-number-field.svg?style=flat-square
-[stars-url]: https://github.com/helsingborg-stad/acf-phone-number-field/stargazers
-[issues-shield]: https://img.shields.io/github/issues/helsingborg-stad/acf-phone-number-field.svg?style=flat-square
-[issues-url]: https://github.com/helsingborg-stad/acf-phone-number-field/issues
-[license-shield]: https://img.shields.io/github/license/helsingborg-stad/acf-phone-number-field.svg?style=flat-square
-[license-url]: https://raw.githubusercontent.com/helsingborg-stad/acf-phone-number-field/master/LICENSE
-[product-screenshot]: images/screenshot.png
+MIT. See [LICENSE](LICENSE).
