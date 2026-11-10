@@ -1,7 +1,7 @@
 php-version = "8.3.0"
 
 [source]
-paths = ["acf-phone-number-field.php", "source/php", "tests"]
+paths = ["acf-phone-number-field.php", "build.php", "source/php", "tests"]
 includes = [
     "vendor",
     ".cache/tests/wordpress-develop-7.1.4/src",

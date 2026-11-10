@@ -57,6 +57,18 @@ The bootstrap rejects missing or malformed configuration, an administrator named
 
 Optional `WP_TESTS_DIR` points to `tests/phpunit` in a full wordpress-develop checkout; optional `ACF_PLUGIN_FILE` points to ACF's `acf.php`.
 
+## Deployment build hook
+
+`php build.php` installs production Composer dependencies and generates an authoritative optimized autoloader. It runs from the plugin directory even when invoked from elsewhere. It does not build frontend assets. For development and tests, use `composer install` instead: the production build omits development dependencies.
+
+The parent deployment discovers this hook and may pass:
+
+- `--no-composer`: skip dependency installation when the parent provides the shared autoloader.
+- `--install-npm`: accepted for parent-build compatibility; no action is needed for this PHP-only package.
+- `--cleanup`: remove Git metadata, test caches, tests, tool configuration and build/dependency manifests from the build copy, retaining runtime code, licenses and installed runtime dependencies.
+
+**Run `--cleanup` only in a disposable build copy, never in your development checkout.** This hook does not create a release ZIP or verify the MU-plugin loader.
+
 ## CI and scope
 
 `.github/workflows/tests.yml` configures pull-request checks using the same Composer commands and a disposable MariaDB service. The service container runs on GitHub; local verification uses native PHP/MariaDB.
