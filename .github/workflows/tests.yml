@@ -1,0 +1,67 @@
+name: PHP tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.3']
+
+    services:
+      mariadb:
+        image: mariadb:12.3.2
+        env:
+          MARIADB_RANDOM_ROOT_PASSWORD: '1'
+          MARIADB_DATABASE: acfphonenumbertest
+          MARIADB_USER: acf_phone_test
+          MARIADB_PASSWORD: ${{ github.run_id }}-${{ github.run_attempt }}-disposable
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      ACF_TEST_DB_CONFIG: ${{ runner.temp }}/acf-phone-tests.ini
+      ACF_TEST_DB_CONFIRM: acfphonenumbertest
+      ACF_CI_DB_PASSWORD: ${{ github.run_id }}-${{ github.run_attempt }}-disposable
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: shivammathur/setup-php@d52fc211a0436f8839a587b3b5b8efddab4744ea # v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli, mbstring, dom, xml, xmlwriter
+          tools: composer:v2
+          coverage: none
+
+      - run: composer validate --strict
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: composer setup:tests
+
+      - name: Configure disposable test database connection
+        run: |
+          umask 077
+          php <<'PHP'
+          <?php
+          $ini = "[client]\nhost=127.0.0.1\nport=3306\nuser=acf_phone_test\n";
+          $ini .= 'password="' . getenv('ACF_CI_DB_PASSWORD') . "\"\n";
+          $ini .= 'database=' . getenv('ACF_TEST_DB_CONFIRM') . "\n";
+          if (file_put_contents(getenv('ACF_TEST_DB_CONFIG'), $ini) === false) {
+              throw new RuntimeException('Could not write private CI connection configuration.');
+          }
+          PHP
+
+      - run: composer lint
+      - run: composer test:unit
+      - run: composer test:integration
