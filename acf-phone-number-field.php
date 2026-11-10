@@ -1,55 +1,23 @@
 <?php
 
 /**
- * Plugin Name:       ACF Phone Number Field
- * Plugin URI:        https://github.com/helsingborg-stad/acf-phone-number-field
- * Description:       A phone number field for Advanced Custom Fields.
- * Version:           1.0.0
- * Author:            Nikolas Ramstedt
- * Author URI:        https://github.com/helsingborg-stad
- * License:           MIT
- * License URI:       https://opensource.org/licenses/MIT
- * Text Domain:       acf-phone-number-field
- * Domain Path:       /languages
+ * Plugin Name: ACF Phone Number Field
+ * Description: International phone number field for Advanced Custom Fields (under development).
+ * Version: 0.1.0
+ * Requires PHP: 8.3
+ * License: MIT
+ * Text Domain: acf-phone-number-field
  */
 
-use AcfService\Implementations\NativeAcfService;
-use WpService\Implementations\NativeWpService;
-use WpUtilService\WpUtilService;
+declare(strict_types=1);
 
- // Protect agains direct file access
-if (! defined('WPINC')) {
-    die;
+if (!defined('ABSPATH')) {
+    exit();
 }
 
-define('ACF_PHONE_NUMBER_FIELD_PATH', plugin_dir_path(__FILE__));
-define('ACF_PHONE_NUMBER_FIELD_URL', plugins_url('', __FILE__));
-define('ACF_PHONE_NUMBER_FIELD_TEMPLATE_PATH', ACF_PHONE_NUMBER_FIELD_PATH . 'templates/');
-define('ACF_PHONE_NUMBER_FIELD_TEXT_DOMAIN', 'acf-phone-number-field');
+// Composer deployments may already provide the project's autoloader.
+if (is_readable(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+}
 
-load_plugin_textdomain(ACF_PHONE_NUMBER_FIELD_TEXT_DOMAIN, false, ACF_PHONE_NUMBER_FIELD_PATH . '/languages');
-
-require_once ACF_PHONE_NUMBER_FIELD_PATH . 'Public.php';
-
-// Register the autoloader
-require __DIR__ . '/vendor/autoload.php';
-
-// Acf auto import and export
-add_action('acf/init', function () {
-    $acfExportManager = new \AcfExportManager\AcfExportManager();
-    $acfExportManager->setTextdomain('acf-phone-number-field');
-    $acfExportManager->setExportFolder(ACF_PHONE_NUMBER_FIELD_PATH . 'source/php/AcfFields/');
-    $acfExportManager->autoExport(array(
-        'acf-phone-number-field-settings' => 'group_61ea7a87e8aaa' //Update with acf id here, settings view
-    ));
-    $acfExportManager->import();
-});
-
-$wpService = new NativeWpService();
-$wpUtilService = new WpUtilService($wpService);
-
-// Start application
-new CustomShortLinks\App();
-
-// Start application
-new AcfPhoneNumberField\App($wpUtilService->enqueue(__DIR__), $wpService, new NativeAcfService());
+// Product field registration is deferred; the setup field exists only in tests.
