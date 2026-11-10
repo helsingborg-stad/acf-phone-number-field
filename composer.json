@@ -1,42 +1,49 @@
 {
     "name": "helsingborg-stad/acf-phone-number-field",
-    "description": "A phone number field for Advanced Custom Fields.",
-    "type": "wordpress-plugin",
+    "description": "International phone number field for Advanced Custom Fields.",
+    "type": "wordpress-muplugin",
     "license": "MIT",
-    "scripts": {
-        "test": "vendor/bin/phpunit",
-        "test:coverage": "XDEBUG_MODE=coverage vendor/bin/phpunit",
-        "lint": "vendor/bin/mago lint",
-        "fix": "vendor/bin/mago lint --format-after-fix --fix",
-        "format": "vendor/bin/mago fmt"
+    "require": {
+        "php": "^8.3",
+        "giggsey/libphonenumber-for-php-lite": "^9.0"
     },
-    "authors": [
-        {
-            "name": "Nikolas Ramstedt",
-            "email": "nikolas.ramstedt@helsingborg.se"
-        }
-    ],
+    "require-dev": {
+        "carthage-software/mago": "1.59.0",
+        "phpunit/phpunit": "~9.6.0",
+        "yoast/phpunit-polyfills": "^1.1"
+    },
     "autoload": {
         "psr-4": {
             "AcfPhoneNumberField\\": "source/php/"
         }
     },
-    "minimum-stability": "stable",
-    "require": {
-        "helsingborg-stad/wputilservice": "^0.2.44",
-        "helsingborg-stad/wpservice": "^2.0",
-        "helsingborg-stad/acfservice": "^1.0"
+    "autoload-dev": {
+        "psr-4": {
+            "AcfPhoneNumberField\\Tests\\": "tests/"
+        }
     },
-    "suggest": {
-        "helsingborg-stad/municipio": "^6.0.0"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^11.5",
-        "carthage-software/mago": "^1.6"
+    "scripts": {
+        "test": "phpunit --testsuite unit",
+        "test:unit": "@test",
+        "test:integration": [
+            "@php vendor/bin/phpunit --configuration phpunit.wordpress.xml",
+            "@php vendor/bin/phpunit --configuration phpunit.integration.xml"
+        ],
+        "test:all": [
+            "@test:unit",
+            "@test:integration"
+        ],
+        "lint": [
+            "@php vendor/bin/mago lint",
+            "@php vendor/bin/mago analyze"
+        ],
+        "format": "mago fmt",
+        "setup:tests": "bash scripts/setup-tests.sh"
     },
     "config": {
         "allow-plugins": {
             "carthage-software/mago": true
-        }
+        },
+        "sort-packages": true
     }
 }
