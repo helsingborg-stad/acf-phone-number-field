@@ -5,6 +5,8 @@
  * Description: International phone number field for Advanced Custom Fields (under development).
  * Version: 0.1.0
  * Requires PHP: 8.3
+ * Author: Nikolas Ramstedt
+ * Author URI: https://github.com/helsingborg-stad
  * License: MIT
  * Text Domain: acf-phone-number-field
  */
