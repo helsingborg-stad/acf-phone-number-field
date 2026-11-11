@@ -7,6 +7,7 @@ namespace AcfPhoneNumberField\Tests\Unit;
 use AcfPhoneNumberField\PhoneValidator;
 use PHPUnit\Framework\TestCase;
 
+// @mago-ignore lint:too-many-methods
 final class PhoneValidatorTest extends TestCase
 {
     /** @dataProvider accepted */
@@ -20,6 +21,10 @@ final class PhoneValidatorTest extends TestCase
     {
         return [
             ['070-123 45 67',     'SE', '+46701234567'],
+            ['042 12 34 56',      'SE', '+4642123456'],
+            ['0701234567',        'SE', '+46701234567'],
+            ['075-123 45 67',     'SE', '+46751234567'],
+            ['074-012 34 56',     'SE', '+46740123456'],
             ['070.123.45.67',     'SE', '+46701234567'],
             ['070 (123) 45 67',   'SE', '+46701234567'],
             ['+46 70 123 45 67',  'SE', '+46701234567'],
@@ -42,10 +47,45 @@ final class PhoneValidatorTest extends TestCase
     public static function invalidNumbers(): array
     {
         return [
-            ['070-123 45 67',    'NO'],
             ['+46 10 000 00 00', 'SE'],
-            ['123',              'SE'],
+            ['+999 123456789',   'SE'],
+            ['070123456',        'SE'],
+            ['07012345678',      'SE'],
+            ['+46 70123456',     'NO'],
+            ['+46 7012345678',   'NO'],
+            ['0046 70123456',    'US'],
+            ['0046 7012345678',  'US'],
+            ['+46 701234567890', 'SE'],
+            ['07512345678',      'SE'],
+            ['07401234567',      'SE'],
             ['()',               'SE'],
+        ];
+    }
+
+    /** @dataProvider lengthErrors */
+    public function testLengthErrorsPreserveRejectedValues(string $input, string $region, string $error): void
+    {
+        $validator = new PhoneValidator();
+        self::assertSame($error, $validator->validate($input, $region));
+        self::assertSame($input, $validator->normalize($input, $region));
+        self::assertNull($validator->parse($input, $region));
+    }
+
+    public static function lengthErrors(): array
+    {
+        return [
+            ['123',                         'SE', PhoneValidator::TOO_SHORT],
+            ['12',                          'NO', PhoneValidator::TOO_SHORT],
+            ['+46 1',                       'NO', PhoneValidator::TOO_SHORT],
+            ['0046 1',                      'US', PhoneValidator::TOO_SHORT],
+            ['+47 12',                      'SE', PhoneValidator::TOO_SHORT],
+            ['0047 12',                     'SE', PhoneValidator::TOO_SHORT],
+            ['070-123 45 67',               'NO', PhoneValidator::TOO_LONG],
+            ['+47 406123456',               'SE', PhoneValidator::TOO_LONG],
+            ['0047 406123456',              'US', PhoneValidator::TOO_LONG],
+            ['07012345678901234567890',     'SE', PhoneValidator::TOO_LONG],
+            ['+46 7012345678901234567890',  'NO', PhoneValidator::TOO_LONG],
+            ['0046 7012345678901234567890', 'US', PhoneValidator::TOO_LONG],
         ];
     }
 

@@ -178,8 +178,16 @@ final class Field extends \acf_field_text
                 'Use digits, spaces, hyphens, dots and parentheses, with + only at the start.',
                 'acf-phone-number-field',
             ),
+            PhoneValidator::TOO_SHORT => __(
+                'The phone number appears to be too short. Check that all digits are included.',
+                'acf-phone-number-field',
+            ),
+            PhoneValidator::TOO_LONG => __(
+                'The phone number appears to be too long. Check the number of digits.',
+                'acf-phone-number-field',
+            ),
             PhoneValidator::INVALID_NUMBER => __(
-                'Enter a valid phone number. For international numbers, include the country code with + or 00.',
+                'Check the phone number. Make sure all digits and any country code are correct.',
                 'acf-phone-number-field',
             ),
             default => true,

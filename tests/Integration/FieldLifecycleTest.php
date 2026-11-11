@@ -50,10 +50,23 @@ final class FieldLifecycleTest extends \WP_UnitTestCase
         self::assertSame(
             [[
                 'input' => 'acf[field_phone]',
-                'message' => 'Enter a valid phone number. For international numbers, include the country code with + or 00.',
+                'message' => 'Check the phone number. Make sure all digits and any country code are correct.',
             ]],
             acf_get_validation_errors(),
         );
+    }
+
+    public function testLengthErrorsReachAcfValidation(): void
+    {
+        $field = $this->phoneField();
+        foreach ([
+            '+46 1' => 'The phone number appears to be too short. Check that all digits are included.',
+            '0047 406123456' => 'The phone number appears to be too long. Check the number of digits.',
+        ] as $value => $message) {
+            acf_reset_validation_errors();
+            self::assertFalse(acf_validate_value($value, $field, 'acf[field_phone]'));
+            self::assertSame([['input' => 'acf[field_phone]', 'message' => $message]], acf_get_validation_errors());
+        }
     }
 
     public function testNonDefaultRegionStorageAndStructuredReturn(): int
