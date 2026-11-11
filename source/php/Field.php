@@ -143,8 +143,8 @@ final class Field extends \acf_field_text
         if ($valid !== true) {
             return $valid;
         }
-        $region = $field['default_region'] ?? 'SE';
-        $error = (new PhoneValidator())->validate($value, is_string($region) ? $region : 'SE');
+        $region = is_string($field['default_region'] ?? null) ? $field['default_region'] : 'SE';
+        $error = (new PhoneValidator())->validate($value, $region);
         return match ($error) {
             PhoneValidator::UNSUPPORTED_CHARACTERS => __(
                 'Use digits, spaces, hyphens, dots and parentheses, with + only at the start.',
