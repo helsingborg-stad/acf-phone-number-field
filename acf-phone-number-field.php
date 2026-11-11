@@ -22,4 +22,8 @@ if (is_readable(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
 
-// Product field registration is deferred; the setup field exists only in tests.
+add_action('acf/include_field_types', static function (): void {
+    if (class_exists('acf_field_text') && class_exists(\AcfPhoneNumberField\Field::class)) {
+        acf_register_field_type(\AcfPhoneNumberField\Field::class);
+    }
+});
