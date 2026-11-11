@@ -31,7 +31,7 @@ jobs:
           --health-retries=10
 
     env:
-      ACF_TEST_DB_CONFIG: ${{ runner.temp }}/acf-phone-tests.ini
+      ACF_TEST_DB_CONFIG: /tmp/acf-phone-tests.ini
       ACF_TEST_DB_CONFIRM: acfphonenumbertest
       ACF_CI_DB_PASSWORD: ${{ github.run_id }}-${{ github.run_attempt }}-disposable
 
