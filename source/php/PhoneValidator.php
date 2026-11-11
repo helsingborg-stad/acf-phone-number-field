@@ -51,7 +51,7 @@ final class PhoneValidator
     public function normalize(mixed $value, string $region = 'SE'): mixed
     {
         $number = is_string($value) ? $this->parse($value, $region) : null;
-        return $number === null ? $value : PhoneNumberUtil::getInstance()->format($number, PhoneNumberFormat::NATIONAL);
+        return $number === null ? $value : PhoneNumberUtil::getInstance()->format($number, PhoneNumberFormat::E164);
     }
 
     private function parseNumber(string $value, string $region): PhoneNumber
