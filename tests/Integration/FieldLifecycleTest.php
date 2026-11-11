@@ -146,6 +146,34 @@ final class FieldLifecycleTest extends \WP_UnitTestCase
         );
     }
 
+    public function testRejectedProgrammaticUpdatesPreserveDataAndEmptyUpdatesCanClearIt(): void
+    {
+        $this->phoneField(['return_format' => 'array']);
+        $postId = self::factory()->post->create();
+        self::assertIsInt($postId);
+        update_field('field_phone', '+46701234567', $postId);
+        get_field('contact_phone', $postId); // Warm ACF's formatted-value cache before rejection.
+        self::assertFalse(update_field('field_phone', ['0701234567'], $postId));
+        self::assertSame('+46701234567', get_post_meta($postId, 'contact_phone', true));
+        self::assertSame('field_phone', get_post_meta($postId, '_contact_phone', true));
+        self::assertSame('+46701234567', get_field('contact_phone', $postId, false));
+
+        $newPostId = self::factory()->post->create();
+        self::assertIsInt($newPostId);
+        self::assertFalse(update_field('field_phone', 'not a phone', $newPostId));
+        self::assertFalse(metadata_exists('post', $newPostId, 'contact_phone'));
+        self::assertFalse(metadata_exists('post', $newPostId, '_contact_phone'));
+
+        update_field('field_phone', '', $postId);
+        self::assertSame('', get_field('contact_phone', $postId));
+        self::assertSame('', get_post_meta($postId, 'contact_phone', true));
+
+        update_post_meta($postId, 'contact_phone', 'old phone entry');
+        acf_flush_value_cache($postId, 'contact_phone');
+        self::assertSame('old phone entry', get_field('contact_phone', $postId));
+        self::assertSame('old phone entry', get_post_meta($postId, 'contact_phone', true));
+    }
+
     /** @depends testNonDefaultRegionStorageAndStructuredReturn */
     public function testCoreTeardownRemovesPhoneMetadata(int $postId): void
     {

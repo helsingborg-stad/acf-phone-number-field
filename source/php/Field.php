@@ -21,6 +21,7 @@ final class Field extends \acf_field_text
         $this->description = __('Validated phone number stored as E.164.', 'acf-phone-number-field');
         $this->preview_image = false;
         $this->doc_url = false;
+        add_filter('acf/pre_update_value', [$this, 'pre_update_value'], 10, 4);
     }
 
     /** @param array{id: string, value: mixed, display_format?: string, default_region?: string} $field */
@@ -116,6 +117,16 @@ final class Field extends \acf_field_text
             $schema['additionalProperties'] = false;
         }
         return $schema;
+    }
+
+    /** @param array{type: string, default_region?: string} $field */
+    public function pre_update_value(?bool $check, mixed $value, $postId, array $field): ?bool
+    {
+        if ($check !== null || $field['type'] !== $this->name) {
+            return $check;
+        }
+        // Reject before ACF writes either value or reference metadata.
+        return (new PhoneValidator())->validate($value, $field['default_region'] ?? 'SE') === null ? null : false;
     }
 
     /** @param array{default_region?: string} $field */

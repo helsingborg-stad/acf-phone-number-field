@@ -2,6 +2,8 @@ php-version = "8.3.0"
 
 [source]
 paths = ["acf-phone-number-field.php", "build.php", "source/php", "tests"]
+# WordPress installer placeholders must not shadow the real hook signatures.
+excludes = ["**/wp-admin/includes/noop.php"]
 includes = [
     "vendor",
     ".cache/tests/wordpress-develop-7.1.4/src",

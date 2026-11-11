@@ -27,6 +27,23 @@ final class FieldAdapterTest extends TestCase
      * @runInSeparateProcess
      * @preserveGlobalState disabled
      */
+    public function testUpdateGuardPreservesEarlierDecisionsAndIgnoresOtherFieldTypes(): void
+    {
+        class_alias((new class {
+            public string $name = 'municipio_phone_number';
+        })::class, 'acf_field_text');
+        $field = new Field();
+        $phone = ['type' => 'municipio_phone_number'];
+        self::assertFalse($field->pre_update_value(false, '0701234567', 1, $phone));
+        self::assertTrue($field->pre_update_value(true, 'invalid', 1, $phone));
+        self::assertNull($field->pre_update_value(null, 'invalid', 1, ['type' => 'text']));
+        self::assertNull($field->pre_update_value(null, null, 1, $phone));
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
     public function testEarlierValidationFailuresArePreserved(): void
     {
         class_alias((new class {})::class, 'acf_field_text');
