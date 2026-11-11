@@ -8,11 +8,6 @@ use AcfPhoneNumberField\Field;
 
 final class FieldLifecycleTest extends \WP_UnitTestCase
 {
-    public function testIntentionalCiFailure(): void
-    {
-        self::fail('Intentional failure to verify CI reporting.');
-    }
-
     private function phoneField(array $settings = [], bool $rest = false): array
     {
         acf_add_local_field_group([
