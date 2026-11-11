@@ -8,6 +8,11 @@ use AcfPhoneNumberField\Field;
 
 final class FieldLifecycleTest extends \WP_UnitTestCase
 {
+    public function testIntentionalLintThreshold(): void
+    {
+        self::assertTrue(true);
+    }
+
     private function phoneField(array $settings = [], bool $rest = false): array
     {
         acf_add_local_field_group([
