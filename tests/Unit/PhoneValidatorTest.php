@@ -48,7 +48,6 @@ final class PhoneValidatorTest extends TestCase
     {
         return [
             ['+46 10 000 00 00', 'SE'],
-            ['+999 123456789',   'SE'],
             ['070123456',        'SE'],
             ['07012345678',      'SE'],
             ['+46 70123456',     'NO'],
@@ -60,6 +59,15 @@ final class PhoneValidatorTest extends TestCase
             ['07401234567',      'SE'],
             ['()',               'SE'],
         ];
+    }
+
+    public function testInvalidCountryCodeIsReportedWithoutChangingTheValue(): void
+    {
+        $validator = new PhoneValidator();
+        foreach (['+999 123456789', '00999 123456789'] as $input) {
+            self::assertSame(PhoneValidator::INVALID_COUNTRY_CODE, $validator->validate($input));
+            self::assertSame($input, $validator->normalize($input));
+        }
     }
 
     /** @dataProvider lengthErrors */
@@ -74,6 +82,7 @@ final class PhoneValidatorTest extends TestCase
     public static function lengthErrors(): array
     {
         return [
+            ['22222222222',                 'SE', PhoneValidator::INVALID_LENGTH],
             ['123',                         'SE', PhoneValidator::TOO_SHORT],
             ['12',                          'NO', PhoneValidator::TOO_SHORT],
             ['+46 1',                       'NO', PhoneValidator::TOO_SHORT],

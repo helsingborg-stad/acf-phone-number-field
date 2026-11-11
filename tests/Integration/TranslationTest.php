@@ -46,6 +46,24 @@ final class TranslationTest extends \WP_UnitTestCase
                 [],
                 '',
             ));
+            self::assertSame('Kontrollera landsnumret och använd + eller 00 för internationella nummer.', $field->validate_value(
+                true,
+                '+999 123456789',
+                [],
+                '',
+            ));
+            self::assertSame('Kontrollera antalet siffror i telefonnumret.', $field->validate_value(
+                true,
+                '22222222222',
+                [],
+                '',
+            ));
+            ob_start();
+            $field->render_field(['id' => 'phone', 'value' => '']);
+            $html = ob_get_clean();
+            self::assertIsString($html);
+            self::assertStringContainsString('Använd mellanslag, bindestreck, punkter eller parenteser.', $html);
+            self::assertStringContainsString('med standardregion SE', $html);
             self::assertSame('en_US', $switcher->restore_previous_locale());
             $field->initialize();
             self::assertSame('Phone number', $field->label);

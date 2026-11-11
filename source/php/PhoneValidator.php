@@ -14,6 +14,8 @@ final class PhoneValidator
 {
     public const UNSUPPORTED_CHARACTERS = 'unsupported_characters';
     public const INVALID_NUMBER = 'invalid_number';
+    public const INVALID_COUNTRY_CODE = 'invalid_country_code';
+    public const INVALID_LENGTH = 'invalid_length';
     public const TOO_SHORT = 'too_short';
     public const TOO_LONG = 'too_long';
 
@@ -35,6 +37,7 @@ final class PhoneValidator
             return match ($exception->getErrorType()) {
                 NumberParseException::TOO_SHORT_AFTER_IDD, NumberParseException::TOO_SHORT_NSN => self::TOO_SHORT,
                 NumberParseException::TOO_LONG => self::TOO_LONG,
+                NumberParseException::INVALID_COUNTRY_CODE => self::INVALID_COUNTRY_CODE,
                 default => self::INVALID_NUMBER,
             };
         }
@@ -44,6 +47,8 @@ final class PhoneValidator
         return match ($util->isPossibleNumberWithReason($number)) {
             ValidationResult::TOO_SHORT => self::TOO_SHORT,
             ValidationResult::TOO_LONG => self::TOO_LONG,
+            ValidationResult::INVALID_COUNTRY_CODE => self::INVALID_COUNTRY_CODE,
+            ValidationResult::INVALID_LENGTH => self::INVALID_LENGTH,
             default => self::INVALID_NUMBER,
         };
     }

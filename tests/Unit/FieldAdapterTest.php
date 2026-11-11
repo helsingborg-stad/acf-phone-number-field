@@ -42,6 +42,41 @@ final class FieldAdapterTest extends TestCase
      * @runInSeparateProcess
      * @preserveGlobalState disabled
      */
+    public function testHelpAndCountryCodeFeedback(): void
+    {
+        require __DIR__ . '/../Fixtures/field-functions.php';
+        class_alias((new class {})::class, 'acf_field_text');
+        $field = new Field();
+        ob_start();
+        $field->render_field(['id' => 'phone', 'value' => '']);
+        $html = ob_get_clean();
+        self::assertIsString($html);
+        self::assertStringContainsString('aria-describedby="phone-phone-help"', $html);
+        self::assertStringContainsString('id="phone-phone-help"', $html);
+        foreach ([
+            'spaces',
+            'hyphens',
+            'dots',
+            'parentheses',
+            'Default Region SE',
+            '070-123 45 67',
+            '+46 70 123 45 67',
+            '00',
+        ] as $text) {
+            self::assertStringContainsString($text, $html);
+        }
+        $error = $field->validate_value(true, '+999 123456789', [], 'phone');
+        self::assertIsString($error);
+        self::assertStringContainsString('country code', $error);
+        $lengthError = $field->validate_value(true, '22222222222', [], 'phone');
+        self::assertIsString($lengthError);
+        self::assertStringContainsString('digits', $lengthError);
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
     public function testEarlierValidationFailuresArePreserved(): void
     {
         class_alias((new class {})::class, 'acf_field_text');

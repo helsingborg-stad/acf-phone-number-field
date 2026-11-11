@@ -47,10 +47,6 @@ msgstr "Telefonnummer"
 msgid "Validated phone number stored as E.164."
 msgstr "Validerat telefonnummer som lagras i E.164-format."
 
-#: source/php/Field.php:56
-msgid "For international numbers, include the country code with + or 00."
-msgstr "Ange landsnumret med + eller 00 för internationella nummer."
-
 #: source/php/Field.php:69
 msgid "Default Region"
 msgstr "Standardregion"
@@ -95,6 +91,18 @@ msgstr "Telefonnumret verkar vara för kort. Kontrollera att alla siffror är me
 msgid "The phone number appears to be too long. Check the number of digits."
 msgstr "Telefonnumret verkar vara för långt. Kontrollera antalet siffror."
 
-#: source/php/Field.php:189
+#: source/php/Field.php:197
 msgid "Check the phone number. Make sure all digits and any country code are correct."
 msgstr "Kontrollera telefonnumret. Se till att alla siffror och eventuellt landsnummer är korrekta."
+
+#: source/php/Field.php:56
+msgid "Use spaces, hyphens, dots or parentheses. For example, 070-123 45 67 with Default Region SE. For international numbers, include the country code with + or 00, for example +46 70 123 45 67."
+msgstr "Använd mellanslag, bindestreck, punkter eller parenteser. Till exempel 070-123 45 67 med standardregion SE. För internationella nummer, ange landsnummer med + eller 00, till exempel +46 70 123 45 67."
+
+#: source/php/Field.php:189
+msgid "Check the country code and use + or 00 for international numbers."
+msgstr "Kontrollera landsnumret och använd + eller 00 för internationella nummer."
+
+#: source/php/Field.php:193
+msgid "Check the number of digits in the phone number."
+msgstr "Kontrollera antalet siffror i telefonnumret."

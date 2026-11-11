@@ -3,13 +3,13 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: ACF Phone Number Field 0.1.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/apn-2mzq\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/apn-av8y\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-11T18:15:21+00:00\n"
+"POT-Creation-Date: 2026-11-11T18:33:06+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: acf-phone-number-field\n"
@@ -43,7 +43,7 @@ msgid "Validated phone number stored as E.164."
 msgstr ""
 
 #: source/php/Field.php:56
-msgid "For international numbers, include the country code with + or 00."
+msgid "Use spaces, hyphens, dots or parentheses. For example, 070-123 45 67 with Default Region SE. For international numbers, include the country code with + or 00, for example +46 70 123 45 67."
 msgstr ""
 
 #: source/php/Field.php:69
@@ -91,5 +91,13 @@ msgid "The phone number appears to be too long. Check the number of digits."
 msgstr ""
 
 #: source/php/Field.php:189
+msgid "Check the country code and use + or 00 for international numbers."
+msgstr ""
+
+#: source/php/Field.php:193
+msgid "Check the number of digits in the phone number."
+msgstr ""
+
+#: source/php/Field.php:197
 msgid "Check the phone number. Make sure all digits and any country code are correct."
 msgstr ""

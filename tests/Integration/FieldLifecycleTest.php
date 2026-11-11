@@ -56,12 +56,13 @@ final class FieldLifecycleTest extends \WP_UnitTestCase
         );
     }
 
-    public function testLengthErrorsReachAcfValidation(): void
+    public function testPhoneErrorsReachAcfValidation(): void
     {
         $field = $this->phoneField();
         foreach ([
             '+46 1' => 'The phone number appears to be too short. Check that all digits are included.',
             '0047 406123456' => 'The phone number appears to be too long. Check the number of digits.',
+            '+999 123456789' => 'Check the country code and use + or 00 for international numbers.',
         ] as $value => $message) {
             acf_reset_validation_errors();
             self::assertFalse(acf_validate_value($value, $field, 'acf[field_phone]'));
@@ -113,6 +114,11 @@ final class FieldLifecycleTest extends \WP_UnitTestCase
         $help = $document->getElementById($input->getAttribute('aria-describedby'));
         self::assertInstanceOf(\DOMElement::class, $help);
         self::assertStringContainsString('country code', $help->textContent);
+        self::assertStringContainsString('hyphens', $help->textContent);
+        self::assertStringContainsString('Default Region SE', $help->textContent);
+        self::assertStringContainsString('070-123 45 67', $help->textContent);
+        self::assertStringContainsString('+46 70 123 45 67', $help->textContent);
+        self::assertStringContainsString('00', $help->textContent);
         self::assertTrue(acf_validate_value($input->getAttribute('value'), $field, 'acf[field_phone]'));
         update_field('field_phone', $input->getAttribute('value'), $postId);
         self::assertSame('+4740612345', get_field('contact_phone', $postId, false));

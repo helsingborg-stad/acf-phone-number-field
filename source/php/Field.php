@@ -54,7 +54,7 @@ final class Field extends \acf_field_text
                 . esc_attr($helpId)
                 . '">'
                 . esc_html__(
-                    'For international numbers, include the country code with + or 00.',
+                    'Use spaces, hyphens, dots or parentheses. For example, 070-123 45 67 with Default Region SE. For international numbers, include the country code with + or 00, for example +46 70 123 45 67.',
                     'acf-phone-number-field',
                 )
                 . '</p>';
@@ -184,6 +184,14 @@ final class Field extends \acf_field_text
             ),
             PhoneValidator::TOO_LONG => __(
                 'The phone number appears to be too long. Check the number of digits.',
+                'acf-phone-number-field',
+            ),
+            PhoneValidator::INVALID_COUNTRY_CODE => __(
+                'Check the country code and use + or 00 for international numbers.',
+                'acf-phone-number-field',
+            ),
+            PhoneValidator::INVALID_LENGTH => __(
+                'Check the number of digits in the phone number.',
                 'acf-phone-number-field',
             ),
             PhoneValidator::INVALID_NUMBER => __(
