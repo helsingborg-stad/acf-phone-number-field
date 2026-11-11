@@ -1,11 +1,14 @@
 # ACF Phone Number Field
 
-PHP/ACF plugin under development. The repository provides a local PHP test foundation; the production phone field is not implemented. Do not deploy this setup as a finished phone-field plugin.
+Standalone `municipio_phone_number` field derived from ACF's text field, with strict phone validation, E.164 storage and configurable display/return formats.
+
+Release packaging and deployment verification remain separate from field implementation.
 
 ## Requirements
 
 - PHP 8.3+ with curl, dom, mbstring, mysqli, xml and xmlwriter.
 - Composer 2, curl CLI and tar.
+- WordPress and ACF Free 6.8.11 for the field (verified with WordPress 7.1.4; other versions are not yet verified). Without ACF, registration is safely skipped.
 - MariaDB for integration tests only.
 
 PHP tests require no Node, Docker, web server or IDE. `package.json` and its lockfile are placeholders for future browser-test tooling; there is no frontend build.
@@ -53,9 +56,25 @@ composer test:all
 
 The bootstrap rejects missing or malformed configuration, an administrator named `root`, and a confirmation that does not exactly match the configured database name. It does not provision databases or alter grants.
 
-`composer test:integration` runs two separate PHP processes: the unmodified WordPress lifecycle without ACF, then real ACF registration, E.164 save/read behavior and teardown. The E.164 implementation is a minimal test-only field, not the production phone-field contract.
+`composer test:integration` runs two separate PHP processes: the unmodified WordPress lifecycle without ACF, then the production phone field with real ACF validation, E.164 save/read behavior, foreign-number rendering/resaving, REST formatting/schema and teardown. Phone-rule and format matrices run only in the fast unit suite.
 
 Optional `WP_TESTS_DIR` points to `tests/phpunit` in a full wordpress-develop checkout; optional `ACF_PLUGIN_FILE` points to ACF's `acf.php`.
+
+## Phone field settings
+
+| Setting | Default | Choices |
+| --- | --- | --- |
+| Default Region | `SE` | Supported ISO alpha-2 region codes |
+| Display Format | `auto` | `auto`, `national`, `international`, `e164` |
+| Return Format | `e164` | `e164`, `national`, `international`, `array` |
+
+Automatic display is national for Swedish numbers and international for other numbers, retaining their country code when resaved. Storage is always E.164 for accepted non-empty values; `get_field('contact_phone', $postId, false)` retrieves it without return formatting.
+
+The array return contains `e164`, `national`, `international`, integer `country_code` and `region`. An exposed ACF field group follows ACF REST conventions: `acf_format=light` returns the stored value; `acf_format=standard` uses Return Format. This plugin does not enable field-group REST exposure.
+
+Empty and invalid/unparseable legacy values are returned unchanged for every Return Format and display policy; they are never turned into a valid-looking phone array. Invalid programmatic `update_field()` calls return `false` without changing stored value/reference metadata. Empty updates follow ACF's normal clearing/deletion semantics.
+
+Validation checks characters before libphonenumber's numbering rules. Leading `00` means international regardless of Default Region. Validation does **not** establish that a number exists, is reachable or belongs to its submitter. ACF owns required-value handling.
 
 ## Deployment build hook
 
