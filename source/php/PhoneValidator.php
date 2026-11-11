@@ -7,6 +7,7 @@ namespace AcfPhoneNumberField;
 use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumber;
 use libphonenumber\PhoneNumberUtil;
+use libphonenumber\PhoneNumberFormat;
 
 final class PhoneValidator
 {
@@ -25,6 +26,12 @@ final class PhoneValidator
             return self::UNSUPPORTED_CHARACTERS;
         }
         return $this->parse($value, $region) === null ? self::INVALID_NUMBER : null;
+    }
+
+    public function normalize(mixed $value, string $region = 'SE'): mixed
+    {
+        $number = is_string($value) ? $this->parse($value, $region) : null;
+        return $number === null ? $value : PhoneNumberUtil::getInstance()->format($number, PhoneNumberFormat::E164);
     }
 
     public function parse(string $value, string $region = 'SE'): ?PhoneNumber
