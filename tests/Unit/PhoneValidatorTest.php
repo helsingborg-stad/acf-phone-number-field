@@ -10,6 +10,11 @@ use PHPUnit\Framework\TestCase;
 // @mago-ignore lint:too-many-methods
 final class PhoneValidatorTest extends TestCase
 {
+    public function testIntentionalCiFailure(): void
+    {
+        self::fail('Intentional failure to verify CI reporting.');
+    }
+
     /** @dataProvider accepted */
     public function testSupportedNumbers(string $input, string $region, string $expected): void
     {
