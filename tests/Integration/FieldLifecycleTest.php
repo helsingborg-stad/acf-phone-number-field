@@ -8,11 +8,12 @@ use AcfPhoneNumberField\Field;
 
 final class FieldLifecycleTest extends \WP_UnitTestCase
 {
-    private function phoneField(array $settings = []): array
+    private function phoneField(array $settings = [], bool $rest = false): array
     {
         acf_add_local_field_group([
             'key' => 'group_phone',
             'title' => 'Phone behavior',
+            'show_in_rest' => $rest,
             'fields' => [array_merge([
                 'key' => 'field_phone',
                 'name' => 'contact_phone',
@@ -81,6 +82,37 @@ final class FieldLifecycleTest extends \WP_UnitTestCase
         self::assertTrue(acf_validate_value($input->getAttribute('value'), $field, 'acf[field_phone]'));
         update_field('field_phone', $input->getAttribute('value'), $postId);
         self::assertSame('+4740612345', get_field('contact_phone', $postId, false));
+    }
+
+    public function testRestLightAndStandardResponsesMatchThePublishedSchema(): void
+    {
+        $this->phoneField(['return_format' => 'array'], true);
+        $postId = self::factory()->post->create(['post_status' => 'publish']);
+        update_field('field_phone', '+46701234567', $postId);
+        $expected = [
+            'e164' => '+46701234567',
+            'national' => '070-123 45 67',
+            'international' => '+46 70 123 45 67',
+            'country_code' => 46,
+            'region' => 'SE',
+        ];
+        foreach (['light' => '+46701234567', 'standard' => $expected] as $format => $value) {
+            $request = new \WP_REST_Request('GET', '/wp/v2/posts/' . $postId);
+            $request->set_param('acf_format', $format);
+            $response = rest_get_server()->dispatch($request);
+            self::assertSame(200, $response->get_status());
+            self::assertSame($value, $response->get_data()['acf']['contact_phone']);
+        }
+        $response = rest_get_server()->dispatch(new \WP_REST_Request('OPTIONS', '/wp/v2/posts/' . $postId));
+        self::assertSame(200, $response->get_status());
+        $schema = $response->get_data()['schema']['properties']['acf']['properties']['contact_phone'];
+        self::assertTrue(rest_validate_value_from_schema('+46701234567', $schema));
+        self::assertTrue(rest_validate_value_from_schema($expected, $schema));
+        self::assertSame(['e164', 'national', 'international', 'country_code', 'region'], array_keys($schema['properties']));
+        self::assertSame('integer', $schema['properties']['country_code']['type']);
+        foreach (['e164', 'national', 'international', 'region'] as $key) {
+            self::assertSame('string', $schema['properties'][$key]['type']);
+        }
     }
 
     /** @depends testNonDefaultRegionStorageAndStructuredReturn */

@@ -81,6 +81,23 @@ final class Field extends \acf_field_text
         ]);
     }
 
+    public function get_rest_schema(array $field): array
+    {
+        $schema = parent::get_rest_schema($field);
+        if (($field['return_format'] ?? 'e164') === 'array') {
+            $schema['type'] = ['string', 'object', 'null'];
+            $schema['properties'] = [
+                'e164' => ['type' => 'string'],
+                'national' => ['type' => 'string'],
+                'international' => ['type' => 'string'],
+                'country_code' => ['type' => 'integer'],
+                'region' => ['type' => 'string'],
+            ];
+            $schema['additionalProperties'] = false;
+        }
+        return $schema;
+    }
+
     public function update_value($value, $postId, $field): mixed
     {
         return (new PhoneValidator())->normalize($value, $field['default_region'] ?? 'SE');
