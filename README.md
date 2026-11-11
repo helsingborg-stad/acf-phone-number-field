@@ -68,7 +68,7 @@ Optional `WP_TESTS_DIR` points to `tests/phpunit` in a full wordpress-develop ch
 | Display Format | `auto` | `auto`, `national`, `international`, `e164` |
 | Return Format | `e164` | `e164`, `national`, `international`, `array` |
 
-Automatic display is national for Swedish numbers and international for other numbers, retaining their country code when resaved. Storage is always E.164 for accepted non-empty values; `get_field('contact_phone', $postId, false)` retrieves it without return formatting.
+Automatic display is national for Swedish numbers only when Default Region is `SE`; otherwise it is international, retaining the country code for safe resaving. Storage is always E.164 for accepted non-empty values; `get_field('contact_phone', $postId, false)` retrieves it without return formatting.
 
 The array return contains `e164`, `national`, `international`, integer `country_code` and `region`. An exposed ACF field group follows ACF REST conventions: `acf_format=light` returns the stored value; `acf_format=standard` uses Return Format. This plugin does not enable field-group REST exposure.
 

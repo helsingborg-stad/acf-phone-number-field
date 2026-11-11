@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AcfPhoneNumberField\Tests\Unit;
 
 use AcfPhoneNumberField\PhoneFormatter;
+use AcfPhoneNumberField\PhoneValidator;
 use PHPUnit\Framework\TestCase;
 
 final class PhoneFormatterTest extends TestCase
@@ -49,6 +50,15 @@ final class PhoneFormatterTest extends TestCase
     public static function fallbackValues(): array
     {
         return [[''], [null], [false], ['old phone entry'], ['()'], ['123']];
+    }
+
+    public function testAutomaticSwedishDisplayCanBeResavedWithANonSwedishDefaultRegion(): void
+    {
+        $number = '+46701234567';
+        $display = (new PhoneFormatter())->display($number, 'auto', 'NO');
+        self::assertSame('+46 70 123 45 67', $display);
+        self::assertNull((new PhoneValidator())->validate($display, 'NO'));
+        self::assertSame($number, (new PhoneValidator())->normalize($display, 'NO'));
     }
 
     /** @dataProvider displayValues */
