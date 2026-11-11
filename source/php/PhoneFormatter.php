@@ -36,9 +36,10 @@ final class PhoneFormatter
     {
         if ($format === 'auto') {
             $number = is_string($value) ? (new PhoneValidator())->parse($value, $region) : null;
-            $format = $number !== null && PhoneNumberUtil::getInstance()->getRegionCodeForNumber($number) === 'SE'
-                ? 'national'
-                : 'international';
+            $format =
+                $number !== null && PhoneNumberUtil::getInstance()->getRegionCodeForNumber($number) === 'SE'
+                    ? 'national'
+                    : 'international';
         }
         return $this->format($value, $format, $region);
     }

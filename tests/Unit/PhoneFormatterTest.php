@@ -21,13 +21,16 @@ final class PhoneFormatterTest extends TestCase
             ['e164', '+46701234567'],
             ['national', '070-123 45 67'],
             ['international', '+46 70 123 45 67'],
-            ['array', [
-                'e164' => '+46701234567',
-                'national' => '070-123 45 67',
-                'international' => '+46 70 123 45 67',
-                'country_code' => 46,
-                'region' => 'SE',
-            ]],
+            [
+                'array',
+                [
+                    'e164' => '+46701234567',
+                    'national' => '070-123 45 67',
+                    'international' => '+46 70 123 45 67',
+                    'country_code' => 46,
+                    'region' => 'SE',
+                ],
+            ],
         ];
     }
 
@@ -40,11 +43,11 @@ final class PhoneFormatterTest extends TestCase
     public static function displayValues(): array
     {
         return [
-            ['+46701234567', 'national', '070-123 45 67'],
+            ['+46701234567', 'national',      '070-123 45 67'],
             ['+46701234567', 'international', '+46 70 123 45 67'],
-            ['+46701234567', 'e164', '+46701234567'],
-            ['+46701234567', 'auto', '070-123 45 67'],
-            ['+4740612345', 'auto', '+47 40 61 23 45'],
+            ['+46701234567', 'e164',          '+46701234567'],
+            ['+46701234567', 'auto',          '070-123 45 67'],
+            ['+4740612345',  'auto',          '+47 40 61 23 45'],
         ];
     }
 }

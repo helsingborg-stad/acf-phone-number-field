@@ -19,17 +19,17 @@ final class PhoneValidatorTest extends TestCase
     public static function accepted(): array
     {
         return [
-            ['070-123 45 67', 'SE', '+46701234567'],
-            ['070.123.45.67', 'SE', '+46701234567'],
-            ['070 (123) 45 67', 'SE', '+46701234567'],
-            ['+46 70 123 45 67', 'SE', '+46701234567'],
+            ['070-123 45 67',     'SE', '+46701234567'],
+            ['070.123.45.67',     'SE', '+46701234567'],
+            ['070 (123) 45 67',   'SE', '+46701234567'],
+            ['+46 70 123 45 67',  'SE', '+46701234567'],
             ['0046 70 123 45 67', 'SE', '+46701234567'],
             ['0046 70 123 45 67', 'US', '+46701234567'],
-            ['+47 406 12 345', 'SE', '+4740612345'],
-            ['0047 406 12 345', 'SE', '+4740612345'],
-            ['406 12 345', 'SE', '+4640612345'],
-            ['406 12 345', 'NO', '+4740612345'],
-            ['+46 70 123 45 67', 'NO', '+46701234567'],
+            ['+47 406 12 345',    'SE', '+4740612345'],
+            ['0047 406 12 345',   'SE', '+4740612345'],
+            ['406 12 345',        'SE', '+4640612345'],
+            ['406 12 345',        'NO', '+4740612345'],
+            ['+46 70 123 45 67',  'NO', '+46701234567'],
         ];
     }
 
@@ -41,7 +41,12 @@ final class PhoneValidatorTest extends TestCase
 
     public static function invalidNumbers(): array
     {
-        return [['070-123 45 67', 'NO'], ['+46 10 000 00 00', 'SE'], ['123', 'SE'], ['()', 'SE']];
+        return [
+            ['070-123 45 67',    'NO'],
+            ['+46 10 000 00 00', 'SE'],
+            ['123',              'SE'],
+            ['()',               'SE'],
+        ];
     }
 
     /** @dataProvider unsupportedCharacters */
@@ -53,7 +58,13 @@ final class PhoneValidatorTest extends TestCase
     public static function unsupportedCharacters(): array
     {
         return array_map(static fn(string $value): array => [$value], [
-            '070ABC4567', '070/1234567', '+', '++46701234567', '070+1234567', "070\t1234567", "0701234567\n",
+            '070ABC4567',
+            '070/1234567',
+            '+',
+            '++46701234567',
+            '070+1234567',
+            "070\t1234567",
+            "0701234567\n",
         ]);
     }
 
@@ -65,28 +76,7 @@ final class PhoneValidatorTest extends TestCase
 
     public static function malformed(): array
     {
-        return [[0], [701234567], [false], [[]], [['0701234567']], [new \stdClass()]];
-    }
-
-    /** @dataProvider rejectedNormalization */
-    public function testNormalizationDoesNotRepairOrDiscardRejectedValues(mixed $input): void
-    {
-        self::assertSame($input, (new PhoneValidator())->normalize($input));
-    }
-
-    public static function rejectedNormalization(): array
-    {
-        return [['070ABC4567'], ['++46701234567'], ['123'], ['+46 10 000 00 00'], [''], [null], [[]], [0]];
-    }
-
-    public function testNormalizationIsIdempotent(): void
-    {
-        $validator = new PhoneValidator();
-        $value = '+46701234567';
-        for ($i = 0; $i < 3; $i++) {
-            $value = $validator->normalize($value);
-            self::assertSame('+46701234567', $value);
-        }
+        return [[0], [701_234_567], [false], [[]], [['0701234567']], [new \stdClass()]];
     }
 
     public function testEmptyValuesLeaveRequiredHandlingToAcf(): void

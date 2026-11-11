@@ -6,8 +6,8 @@ namespace AcfPhoneNumberField;
 
 use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumber;
-use libphonenumber\PhoneNumberUtil;
 use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
 
 final class PhoneValidator
 {

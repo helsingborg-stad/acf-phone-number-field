@@ -22,7 +22,9 @@ final class FieldLifecycleTest extends \WP_UnitTestCase
             ], $settings)],
             'location' => [[['param' => 'post_type', 'operator' => '==', 'value' => 'post']]],
         ]);
-        return acf_get_field('field_phone');
+        $field = acf_get_field('field_phone');
+        self::assertIsArray($field);
+        return $field;
     }
 
     public function testRegistrationAndValidationThroughAcf(): void
@@ -31,15 +33,27 @@ final class FieldLifecycleTest extends \WP_UnitTestCase
         $field = $this->phoneField();
         self::assertTrue(acf_validate_value('070-123 45 67', $field, 'acf[field_phone]'));
         self::assertFalse(acf_validate_value('070ABC4567', $field, 'acf[field_phone]'));
-        self::assertSame([
-            ['input' => 'acf[field_phone]', 'message' => 'Use digits, spaces, hyphens, dots and parentheses, with + only at the start.'],
-        ], acf_get_validation_errors());
+        self::assertSame(
+            [
+                [
+                    'input' => 'acf[field_phone]',
+                    'message' => 'Use digits, spaces, hyphens, dots and parentheses, with + only at the start.',
+                ],
+            ],
+            acf_get_validation_errors(),
+        );
 
         // Exercise native validation, not just our callback, before deciding on a guard.
         acf_reset_validation_errors();
         $_POST['acf'] = ['field_phone' => ['0701234567']];
         self::assertFalse(acf_validate_save_post());
-        self::assertSame('acf[field_phone]', acf_get_validation_errors()[0]['input']);
+        self::assertSame(
+            [[
+                'input' => 'acf[field_phone]',
+                'message' => 'Enter a valid phone number. For international numbers, include the country code with + or 00.',
+            ]],
+            acf_get_validation_errors(),
+        );
     }
 
     public function testNonDefaultRegionStorageAndStructuredReturn(): int
@@ -50,13 +64,16 @@ final class FieldLifecycleTest extends \WP_UnitTestCase
         self::assertNotFalse(update_field('field_phone', '406 12 345', $postId));
         self::assertSame('+4740612345', get_post_meta($postId, 'contact_phone', true));
         self::assertSame('+4740612345', get_field('contact_phone', $postId, false));
-        self::assertSame([
-            'e164' => '+4740612345',
-            'national' => '40 61 23 45',
-            'international' => '+47 40 61 23 45',
-            'country_code' => 47,
-            'region' => 'NO',
-        ], get_field('contact_phone', $postId));
+        self::assertSame(
+            [
+                'e164' => '+4740612345',
+                'national' => '40 61 23 45',
+                'international' => '+47 40 61 23 45',
+                'country_code' => 47,
+                'region' => 'NO',
+            ],
+            get_field('contact_phone', $postId),
+        );
         return $postId;
     }
 
@@ -77,8 +94,12 @@ final class FieldLifecycleTest extends \WP_UnitTestCase
         self::assertSame('tel', $input->getAttribute('type'));
         self::assertSame('tel', $input->getAttribute('autocomplete'));
         self::assertSame('+47 40 61 23 45', $input->getAttribute('value'));
-        self::assertSame($input->getAttribute('id'), $document->getElementsByTagName('label')->item(0)->getAttribute('for'));
-        self::assertStringContainsString('country code', $document->getElementById($input->getAttribute('aria-describedby'))->textContent);
+        $label = $document->getElementsByTagName('label')->item(0);
+        self::assertInstanceOf(\DOMElement::class, $label);
+        self::assertSame($input->getAttribute('id'), $label->getAttribute('for'));
+        $help = $document->getElementById($input->getAttribute('aria-describedby'));
+        self::assertInstanceOf(\DOMElement::class, $help);
+        self::assertStringContainsString('country code', $help->textContent);
         self::assertTrue(acf_validate_value($input->getAttribute('value'), $field, 'acf[field_phone]'));
         update_field('field_phone', $input->getAttribute('value'), $postId);
         self::assertSame('+4740612345', get_field('contact_phone', $postId, false));
@@ -88,6 +109,7 @@ final class FieldLifecycleTest extends \WP_UnitTestCase
     {
         $this->phoneField(['return_format' => 'array'], true);
         $postId = self::factory()->post->create(['post_status' => 'publish']);
+        self::assertIsInt($postId);
         update_field('field_phone', '+46701234567', $postId);
         $expected = [
             'e164' => '+46701234567',
@@ -101,18 +123,27 @@ final class FieldLifecycleTest extends \WP_UnitTestCase
             $request->set_param('acf_format', $format);
             $response = rest_get_server()->dispatch($request);
             self::assertSame(200, $response->get_status());
-            self::assertSame($value, $response->get_data()['acf']['contact_phone']);
+            /** @var array{acf: array{contact_phone: mixed}} $data */
+            $data = $response->get_data();
+            self::assertSame($value, $data['acf']['contact_phone']);
         }
         $response = rest_get_server()->dispatch(new \WP_REST_Request('OPTIONS', '/wp/v2/posts/' . $postId));
         self::assertSame(200, $response->get_status());
-        $schema = $response->get_data()['schema']['properties']['acf']['properties']['contact_phone'];
+        /** @var array{schema: array{properties: array{acf: array{properties: array{contact_phone: array}}}}} $data */
+        $data = $response->get_data();
+        $schema = $data['schema']['properties']['acf']['properties']['contact_phone'];
         self::assertTrue(rest_validate_value_from_schema('+46701234567', $schema));
         self::assertTrue(rest_validate_value_from_schema($expected, $schema));
-        self::assertSame(['e164', 'national', 'international', 'country_code', 'region'], array_keys($schema['properties']));
-        self::assertSame('integer', $schema['properties']['country_code']['type']);
-        foreach (['e164', 'national', 'international', 'region'] as $key) {
-            self::assertSame('string', $schema['properties'][$key]['type']);
-        }
+        self::assertSame(
+            [
+                'e164' => ['type' => 'string'],
+                'national' => ['type' => 'string'],
+                'international' => ['type' => 'string'],
+                'country_code' => ['type' => 'integer'],
+                'region' => ['type' => 'string'],
+            ],
+            $schema['properties'],
+        );
     }
 
     /** @depends testNonDefaultRegionStorageAndStructuredReturn */
