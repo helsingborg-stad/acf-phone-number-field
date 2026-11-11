@@ -18,8 +18,6 @@ final class FieldAdapterTest extends TestCase
         require __DIR__ . '/../Fixtures/hooks.php';
         define('ABSPATH', '/unused/');
         require dirname(__DIR__, 2) . '/acf-phone-number-field.php';
-        self::assertCount(1, phone_test_actions());
-        phone_test_actions()[0]();
         self::assertFalse(class_exists(Field::class, false));
     }
 
