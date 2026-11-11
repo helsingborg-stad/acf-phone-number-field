@@ -59,6 +59,30 @@ final class FieldLifecycleTest extends \WP_UnitTestCase
         return $postId;
     }
 
+    public function testForeignNumberCanBeRenderedAndResavedWithoutLosingItsCountryCode(): void
+    {
+        $field = $this->phoneField();
+        $postId = self::factory()->post->create();
+        update_field('field_phone', '+4740612345', $postId);
+        $field['value'] = get_field('contact_phone', $postId, false);
+        ob_start();
+        acf_render_field_wrap($field);
+        $html = ob_get_clean();
+        self::assertIsString($html);
+        $document = new \DOMDocument();
+        $document->loadHTML($html);
+        $input = $document->getElementsByTagName('input')->item(0);
+        self::assertInstanceOf(\DOMElement::class, $input);
+        self::assertSame('tel', $input->getAttribute('type'));
+        self::assertSame('tel', $input->getAttribute('autocomplete'));
+        self::assertSame('+47 40 61 23 45', $input->getAttribute('value'));
+        self::assertSame($input->getAttribute('id'), $document->getElementsByTagName('label')->item(0)->getAttribute('for'));
+        self::assertStringContainsString('country code', $document->getElementById($input->getAttribute('aria-describedby'))->textContent);
+        self::assertTrue(acf_validate_value($input->getAttribute('value'), $field, 'acf[field_phone]'));
+        update_field('field_phone', $input->getAttribute('value'), $postId);
+        self::assertSame('+4740612345', get_field('contact_phone', $postId, false));
+    }
+
     /** @depends testNonDefaultRegionStorageAndStructuredReturn */
     public function testCoreTeardownRemovesPhoneMetadata(int $postId): void
     {
