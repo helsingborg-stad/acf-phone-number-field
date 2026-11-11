@@ -12,6 +12,21 @@ final class Field extends \acf_field_text
         $this->name = 'municipio_phone_number';
         $this->label = __('Phone number', 'acf-phone-number-field');
         $this->defaults['default_region'] = 'SE';
+        $this->defaults['return_format'] = 'e164';
+    }
+
+    public function update_value($value, $postId, $field): mixed
+    {
+        return (new PhoneValidator())->normalize($value, $field['default_region'] ?? 'SE');
+    }
+
+    public function format_value($value, $postId, $field): mixed
+    {
+        return (new PhoneFormatter())->format(
+            $value,
+            $field['return_format'] ?? 'e164',
+            $field['default_region'] ?? 'SE',
+        );
     }
 
     public function validate_value($valid, $value, $field, $input)

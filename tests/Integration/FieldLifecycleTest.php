@@ -4,46 +4,75 @@ declare(strict_types=1);
 
 namespace AcfPhoneNumberField\Tests\Integration;
 
+use AcfPhoneNumberField\Field;
+
 final class FieldLifecycleTest extends \WP_UnitTestCase
 {
-    public function testGivenNationalPhoneWhenSavedThroughAcfThenE164IsStoredAndReturned(): int
+    private function phoneField(array $settings = []): array
     {
-        self::assertInstanceOf(SetupField::class, acf_get_field_type('acf_phone_setup'));
         acf_add_local_field_group([
-            'key' => 'group_acf_phone_setup',
-            'title' => 'Setup phone behavior',
-            'fields' => [[
-                'key' => 'field_acf_phone_setup',
-                'name' => 'setup_phone',
+            'key' => 'group_phone',
+            'title' => 'Phone behavior',
+            'fields' => [array_merge([
+                'key' => 'field_phone',
+                'name' => 'contact_phone',
                 'label' => 'Phone',
-                'type' => 'acf_phone_setup',
-            ]],
+                'type' => 'municipio_phone_number',
+            ], $settings)],
             'location' => [[['param' => 'post_type', 'operator' => '==', 'value' => 'post']]],
         ]);
+        return acf_get_field('field_phone');
+    }
+
+    public function testRegistrationAndValidationThroughAcf(): void
+    {
+        self::assertInstanceOf(Field::class, acf_get_field_type('municipio_phone_number'));
+        $field = $this->phoneField();
+        self::assertTrue(acf_validate_value('070-123 45 67', $field, 'acf[field_phone]'));
+        self::assertFalse(acf_validate_value('070ABC4567', $field, 'acf[field_phone]'));
+        self::assertSame([
+            ['input' => 'acf[field_phone]', 'message' => 'Use digits, spaces, hyphens, dots and parentheses, with + only at the start.'],
+        ], acf_get_validation_errors());
+
+        // Exercise native validation, not just our callback, before deciding on a guard.
+        acf_reset_validation_errors();
+        $_POST['acf'] = ['field_phone' => ['0701234567']];
+        self::assertFalse(acf_validate_save_post());
+        self::assertSame('acf[field_phone]', acf_get_validation_errors()[0]['input']);
+    }
+
+    public function testNonDefaultRegionStorageAndStructuredReturn(): int
+    {
+        $this->phoneField(['default_region' => 'NO', 'return_format' => 'array']);
         $postId = self::factory()->post->create();
         self::assertIsInt($postId);
-
-        self::assertNotFalse(update_field('field_acf_phone_setup', '070-123 45 67', $postId));
-
-        self::assertSame('+46701234567', get_field('setup_phone', $postId));
-        self::assertSame('+46701234567', get_field('setup_phone', $postId, false));
-        self::assertSame('+46701234567', get_post_meta($postId, 'setup_phone', true));
-        self::assertSame('field_acf_phone_setup', get_post_meta($postId, '_setup_phone', true));
+        self::assertNotFalse(update_field('field_phone', '406 12 345', $postId));
+        self::assertSame('+4740612345', get_post_meta($postId, 'contact_phone', true));
+        self::assertSame('+4740612345', get_field('contact_phone', $postId, false));
+        self::assertSame([
+            'e164' => '+4740612345',
+            'national' => '40 61 23 45',
+            'international' => '+47 40 61 23 45',
+            'country_code' => 47,
+            'region' => 'NO',
+        ], get_field('contact_phone', $postId));
         return $postId;
     }
 
-    /**
-     * @depends testGivenNationalPhoneWhenSavedThroughAcfThenE164IsStoredAndReturned
-     */
-    public function testGivenPreviousTestWhenCoreTeardownCompletesThenItsPhoneMetadataIsAbsent(int $postId): void
+    /** @depends testNonDefaultRegionStorageAndStructuredReturn */
+    public function testCoreTeardownRemovesPhoneMetadata(int $postId): void
     {
         self::assertNull(get_post($postId));
-        self::assertSame('', get_post_meta($postId, 'setup_phone', true));
+        self::assertSame('', get_post_meta($postId, 'contact_phone', true));
     }
 
     public function tear_down(): void
     {
-        acf_remove_local_field_group('group_acf_phone_setup');
+        unset($_POST['acf']);
+        acf_reset_validation_errors();
+        acf_get_store('fields')->reset();
+        acf_remove_local_field('field_phone');
+        acf_remove_local_field_group('group_phone');
         parent::tear_down();
     }
 }

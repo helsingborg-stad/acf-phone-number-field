@@ -19,10 +19,6 @@ if (getenv('ACF_TEST_LOAD_ACF') === '1') {
     }
 
     tests_add_filter('muplugins_loaded', static function () use ($acfFile): void {
-        add_action('acf/include_field_types', static function (): void {
-            require_once __DIR__ . '/SetupField.php';
-            acf_register_field_type(AcfPhoneNumberField\Tests\Integration\SetupField::class);
-        });
         require_once $acfFile;
         require_once dirname(__DIR__, 2) . '/acf-phone-number-field.php';
     });
