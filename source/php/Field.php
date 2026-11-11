@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace AcfPhoneNumberField;
 
+// ACF requires separate lifecycle and settings callbacks on this adapter.
+// @mago-ignore lint:cyclomatic-complexity
+// @mago-ignore lint:too-many-methods
 final class Field extends \acf_field_text
 {
     public function initialize(): void
@@ -143,6 +146,20 @@ final class Field extends \acf_field_text
             $field['return_format'] ?? 'e164',
             $field['default_region'] ?? 'SE',
         );
+    }
+
+    /**
+     * @param bool|\WP_Error $valid
+     * @param mixed $value
+     * @param array $field
+     */
+    public function validate_rest_value($valid, $value, $field): bool|\WP_Error
+    {
+        if ($valid !== true) {
+            return $valid;
+        }
+        $result = $this->validate_value(true, $value, $field, '');
+        return is_string($result) ? new \WP_Error('rest_invalid_param', $result, ['status' => 400]) : $result;
     }
 
     /**

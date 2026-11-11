@@ -146,6 +146,39 @@ final class FieldLifecycleTest extends \WP_UnitTestCase
         );
     }
 
+    public function testRestRejectsInvalidWritesBeforeSavingAndAcceptsValidRegionalInput(): void
+    {
+        $this->phoneField(['default_region' => 'NO'], true);
+        $postId = self::factory()->post->create(['post_status' => 'publish']);
+        self::assertIsInt($postId);
+        $userId = self::factory()->user->create(['role' => 'administrator']);
+        self::assertIsInt($userId);
+        wp_set_current_user($userId);
+        update_field('field_phone', '+46701234567', $postId);
+
+        $request = new \WP_REST_Request('POST', '/wp/v2/posts/' . $postId);
+        $request->set_body_params(['acf' => ['contact_phone' => 'not a phone']]);
+        // Rebuild core's route arguments after ACF's request-specific schema registration.
+        rest_get_server()->dispatch(new \WP_REST_Request('GET', '/wp/v2/posts/' . $postId));
+        $server = rest_get_server();
+        self::assertInstanceOf(\Spy_REST_Server::class, $server);
+        $server->override_by_default = true;
+        do_action('rest_api_init', $server);
+        $server->override_by_default = false;
+        $response = rest_get_server()->dispatch($request);
+        self::assertSame(400, $response->get_status());
+        /** @var array{data: array{params: array{acf: string}}} $error */
+        $error = $response->get_data();
+        self::assertStringContainsString('Use digits', $error['data']['params']['acf']);
+        self::assertSame('+46701234567', get_post_meta($postId, 'contact_phone', true));
+
+        $request = new \WP_REST_Request('POST', '/wp/v2/posts/' . $postId);
+        $request->set_body_params(['acf' => ['contact_phone' => '406 12 345']]);
+        $response = rest_get_server()->dispatch($request);
+        self::assertSame(200, $response->get_status());
+        self::assertSame('+4740612345', get_post_meta($postId, 'contact_phone', true));
+    }
+
     public function testRejectedProgrammaticUpdatesPreserveDataAndEmptyUpdatesCanClearIt(): void
     {
         $this->phoneField(['return_format' => 'array']);

@@ -48,5 +48,6 @@ final class FieldAdapterTest extends TestCase
         $field = new Field();
         self::assertSame('Earlier error', $field->validate_value('Earlier error', '123', [], 'phone'));
         self::assertFalse($field->validate_value(false, '123', [], 'phone'));
+        self::assertFalse($field->validate_rest_value(false, '123', []));
     }
 }

@@ -55,6 +55,7 @@ final class PhoneFormatterTest extends TestCase
     public function testAutomaticSwedishDisplayCanBeResavedWithANonSwedishDefaultRegion(): void
     {
         $number = '+46701234567';
+        /** @var string $display */
         $display = (new PhoneFormatter())->display($number, 'auto', 'NO');
         self::assertSame('+46 70 123 45 67', $display);
         self::assertNull((new PhoneValidator())->validate($display, 'NO'));
