@@ -34,6 +34,23 @@ final class PhoneFormatterTest extends TestCase
         ];
     }
 
+    /** @dataProvider fallbackValues */
+    public function testEmptyAndLegacyValuesArePreserved(mixed $value): void
+    {
+        $formatter = new PhoneFormatter();
+        foreach (['e164', 'national', 'international', 'array'] as $format) {
+            self::assertSame($value, $formatter->format($value, $format));
+        }
+        foreach (['auto', 'e164', 'national', 'international'] as $format) {
+            self::assertSame($value, $formatter->display($value, $format));
+        }
+    }
+
+    public static function fallbackValues(): array
+    {
+        return [[''], [null], [false], ['old phone entry'], ['()'], ['123']];
+    }
+
     /** @dataProvider displayValues */
     public function testDisplayPolicy(string $value, string $format, string $expected): void
     {
