@@ -1,14 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: ACF Phone Number Field\n"
-"POT-Creation-Date: 2022-03-28 16:14+0200\n"
-"PO-Revision-Date: 2022-03-28 16:14+0200\n"
+"Report-Msgid-Bugs-To: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: sv_SE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2022-03-28 16:14+0200\n"
+"PO-Revision-Date: 2022-03-28 16:14+0200\n"
+"Language: sv_SE\n"
 "X-Generator: Poedit 3.4.2\n"
 "X-Domain: acf-phone-number-field\n"
 "X-Poedit-Basepath: ..\n"
@@ -18,22 +19,82 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.js\n"
 
-#. Plugin Name of the plugin/theme
+#. Plugin Name of the plugin
+#: acf-phone-number-field.php
 msgid "ACF Phone Number Field"
-msgstr ""
+msgstr "ACF-telefonnummerfält"
 
-#. Plugin URI of the plugin/theme
-msgid "https://github.com/helsingborg-stad/acf-phone-number-field"
-msgstr ""
-
-#. Description of the plugin/theme
-msgid "A phone number field for Advanced Custom Fields."
-msgstr ""
-
-#. Author of the plugin/theme
+#. Author of the plugin
+#: acf-phone-number-field.php
 msgid "Nikolas Ramstedt"
-msgstr ""
+msgstr "Nikolas Ramstedt"
 
-#. Author URI of the plugin/theme
+#. Author URI of the plugin
+#: acf-phone-number-field.php
 msgid "https://github.com/helsingborg-stad"
-msgstr ""
+msgstr "https://github.com/helsingborg-stad"
+
+#. Description of the plugin
+#: acf-phone-number-field.php
+msgid "International phone number field for Advanced Custom Fields (under development)."
+msgstr "Internationellt telefonnummerfält för Advanced Custom Fields (under utveckling)."
+
+#: source/php/Field.php:16
+msgid "Phone number"
+msgstr "Telefonnummer"
+
+#: source/php/Field.php:24
+msgid "Validated phone number stored as E.164."
+msgstr "Validerat telefonnummer som lagras i E.164-format."
+
+#: source/php/Field.php:56
+msgid "For international numbers, include the country code with + or 00."
+msgstr "Ange landsnumret med + eller 00 för internationella nummer."
+
+#: source/php/Field.php:69
+msgid "Default Region"
+msgstr "Standardregion"
+
+#: source/php/Field.php:76
+msgid "National"
+msgstr "Nationellt"
+
+#: source/php/Field.php:77
+msgid "International"
+msgstr "Internationellt"
+
+#: source/php/Field.php:80
+msgid "Display Format"
+msgstr "Visningsformat"
+
+#: source/php/Field.php:83
+msgid "Automatic (national for Sweden)"
+msgstr "Automatiskt (nationellt för Sverige)"
+
+#: source/php/Field.php:86
+msgid "Return Format"
+msgstr "Returformat"
+
+#: source/php/Field.php:89
+msgid "Array"
+msgstr "Array"
+
+#: source/php/Field.php:102
+msgid "Placeholder Text"
+msgstr "Platshållartext"
+
+#: source/php/Field.php:177
+msgid "Use digits, spaces, hyphens, dots and parentheses, with + only at the start."
+msgstr "Använd siffror, mellanslag, bindestreck, punkter och parenteser. + får bara stå först."
+
+#: source/php/Field.php:181
+msgid "The phone number appears to be too short. Check that all digits are included."
+msgstr "Telefonnumret verkar vara för kort. Kontrollera att alla siffror är med."
+
+#: source/php/Field.php:185
+msgid "The phone number appears to be too long. Check the number of digits."
+msgstr "Telefonnumret verkar vara för långt. Kontrollera antalet siffror."
+
+#: source/php/Field.php:189
+msgid "Check the phone number. Make sure all digits and any country code are correct."
+msgstr "Kontrollera telefonnumret. Se till att alla siffror och eventuellt landsnummer är korrekta."

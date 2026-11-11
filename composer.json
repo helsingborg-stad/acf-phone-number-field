@@ -38,6 +38,11 @@
             "@php vendor/bin/mago analyze"
         ],
         "format": "mago fmt",
+        "i18n": [
+            "wp i18n make-pot . languages/acf-phone-number-field.pot --domain=acf-phone-number-field --include=acf-phone-number-field.php,source/php --skip-js",
+            "wp i18n update-po languages/acf-phone-number-field.pot languages/acf-phone-number-field-sv_SE.po",
+            "wp i18n make-mo languages/acf-phone-number-field-sv_SE.po languages/acf-phone-number-field-sv_SE.mo"
+        ],
         "setup:tests": "bash scripts/setup-tests.sh"
     },
     "config": {

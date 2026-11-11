@@ -60,6 +60,20 @@ The bootstrap rejects missing or malformed configuration, an administrator named
 
 Optional `WP_TESTS_DIR` points to `tests/phpunit` in a full wordpress-develop checkout; optional `ACF_PLUGIN_FILE` points to ACF's `acf.php`.
 
+## Translations
+
+English source strings are the fallback; Swedish (`sv_SE`) is bundled in `languages/`. At `init` the plugin registers its bundled language directory with WordPress, so it works from either a normal plugin directory or a nested MU-plugin directory. WordPress language packs take precedence. No translation tools are needed at runtime. ACF translates field-type labels/descriptions when it initializes them; those cached metadata are not refreshed by a later locale switch within the same request. Validation messages use the current locale.
+
+To maintain the catalog, install WP-CLI with its `i18n` commands (no WordPress installation is needed for these commands), then run from the repository root:
+
+```sh
+composer i18n
+```
+
+This extracts the main plugin file and `source/php` into the POT, merges it into the Swedish PO without discarding existing translations, and compiles the MO. Edit `languages/acf-phone-number-field-sv_SE.po`, preserving placeholders and contexts, then run `composer i18n` again to compile the changes. Review the POT and PO diff for new, fuzzy or obsolete entries and check in all three files. This is a manual command, not an install hook.
+
+`composer test:integration` exercises the registered path, bundled MO, a Swedish field label and validation message, and English fallback through real WordPress. To check an installed copy, activate Swedish and confirm the phone field label and an invalid-number message; repeat with English to check fallback. For a nested MU installation, load the plugin through the site's MU loader before checking in the same way.
+
 ## Phone field settings
 
 | Setting | Default | Choices |

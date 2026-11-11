@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 // Execute only our bootstrap callback; real hook dispatch is covered by ACF integration.
-function add_action(string $hook, callable $callback): void
+function add_action(string $hook, callable $callback, int $priority = 10): void
 {
-    $callback();
+    if ($hook === 'acf/include_field_types') {
+        $callback();
+    }
 }

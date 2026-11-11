@@ -18,9 +18,10 @@ if (getenv('ACF_TEST_LOAD_ACF') === '1') {
         throw new RuntimeException('ACF test sources are missing. Run composer setup:tests or set ACF_PLUGIN_FILE.');
     }
 
-    tests_add_filter('muplugins_loaded', static function () use ($acfFile): void {
+    $pluginFile = getenv('ACF_TEST_PLUGIN_FILE') ?: dirname(__DIR__, 2) . '/acf-phone-number-field.php';
+    tests_add_filter('muplugins_loaded', static function () use ($acfFile, $pluginFile): void {
         require_once $acfFile;
-        require_once dirname(__DIR__, 2) . '/acf-phone-number-field.php';
+        require_once $pluginFile;
     });
 }
 

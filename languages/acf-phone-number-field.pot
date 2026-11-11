@@ -1,0 +1,95 @@
+# Copyright (C) 2026 Nikolas Ramstedt
+# This file is distributed under the MIT.
+msgid ""
+msgstr ""
+"Project-Id-Version: ACF Phone Number Field 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/apn-2mzq\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-11-11T18:15:21+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: acf-phone-number-field\n"
+
+#. Plugin Name of the plugin
+#: acf-phone-number-field.php
+msgid "ACF Phone Number Field"
+msgstr ""
+
+#. Description of the plugin
+#: acf-phone-number-field.php
+msgid "International phone number field for Advanced Custom Fields (under development)."
+msgstr ""
+
+#. Author of the plugin
+#: acf-phone-number-field.php
+msgid "Nikolas Ramstedt"
+msgstr ""
+
+#. Author URI of the plugin
+#: acf-phone-number-field.php
+msgid "https://github.com/helsingborg-stad"
+msgstr ""
+
+#: source/php/Field.php:16
+msgid "Phone number"
+msgstr ""
+
+#: source/php/Field.php:24
+msgid "Validated phone number stored as E.164."
+msgstr ""
+
+#: source/php/Field.php:56
+msgid "For international numbers, include the country code with + or 00."
+msgstr ""
+
+#: source/php/Field.php:69
+msgid "Default Region"
+msgstr ""
+
+#: source/php/Field.php:76
+msgid "National"
+msgstr ""
+
+#: source/php/Field.php:77
+msgid "International"
+msgstr ""
+
+#: source/php/Field.php:80
+msgid "Display Format"
+msgstr ""
+
+#: source/php/Field.php:83
+msgid "Automatic (national for Sweden)"
+msgstr ""
+
+#: source/php/Field.php:86
+msgid "Return Format"
+msgstr ""
+
+#: source/php/Field.php:89
+msgid "Array"
+msgstr ""
+
+#: source/php/Field.php:102
+msgid "Placeholder Text"
+msgstr ""
+
+#: source/php/Field.php:177
+msgid "Use digits, spaces, hyphens, dots and parentheses, with + only at the start."
+msgstr ""
+
+#: source/php/Field.php:181
+msgid "The phone number appears to be too short. Check that all digits are included."
+msgstr ""
+
+#: source/php/Field.php:185
+msgid "The phone number appears to be too long. Check the number of digits."
+msgstr ""
+
+#: source/php/Field.php:189
+msgid "Check the phone number. Make sure all digits and any country code are correct."
+msgstr ""

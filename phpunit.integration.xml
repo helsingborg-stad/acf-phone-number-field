@@ -13,6 +13,7 @@
     <testsuites>
         <testsuite name="acf-integration">
             <file>tests/Integration/FieldLifecycleTest.php</file>
+            <file>tests/Integration/TranslationTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>
