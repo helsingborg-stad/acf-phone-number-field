@@ -1,38 +1,93 @@
 # ACF Phone Number Field
 
-Standalone `municipio_phone_number` field derived from ACF's text field, with strict phone validation, E.164 storage and configurable display/return formats.
+## Requirements and installation
 
-Release packaging and deployment verification remain separate from field implementation.
+- PHP 8.3+.
+- WordPress and Advanced Custom Fields (ACF) Free 6.8.11. The field has been verified with WordPress 7.1.4; other versions are not yet verified.
+- The plugin's Composer dependencies, including libphonenumber, must be available through its own or a shared autoloader.
 
-## Requirements
+Load `acf-phone-number-field.php` as a WordPress plugin, or through the site's loader for a nested MU-plugin installation. Without ACF, field registration is safely skipped.
 
-- PHP 8.3+ with curl, dom, mbstring, mysqli, xml and xmlwriter.
-- Composer 2, curl CLI and tar.
-- WordPress and ACF Free 6.8.11 for the field (verified with WordPress 7.1.4; other versions are not yet verified). Without ACF, registration is safely skipped.
-- MariaDB for integration tests only.
+## How it works
 
-PHP tests require no Node, Docker, web server or IDE. `package.json` and its lockfile are placeholders for future browser-test tooling; there is no frontend build.
+With Default Region `SE`, different input formats can represent the same number:
 
-The first verified matrix is PHP 8.3.36, PHPUnit 9.6.38, Polyfills 1.1.5, WordPress 7.1.4, ACF Free 6.8.11, libphonenumber 9.0.43 and MariaDB 12.3.2. Mago is pinned to 1.59.0. Other supported PHP versions are not yet verified.
+```text
+Input                   Validate and normalize      Stored (E.164)
+0701234567          \
+070-123 45 67        +--> valid number ----------> +46701234567
++46 70 123 45 67    /                                    |
+                                                        +--> Editor display: 070-123 45 67 (auto)
+                                                        +--> Return value:   +46701234567 (default)
+```
 
-## Install and test
+Input may use different formats, but it must pass validation before it is stored. Display Format controls the editor; Return Format controls the value returned by ACF.
+
+## Usage
+
+In an ACF field group, add a phone number field (`municipio_phone_number`) and configure its settings. For a field named `contact_phone`, retrieve its formatted value using ACF:
+
+```php
+$phone = get_field('contact_phone', $postId);
+```
+
+The return value follows the field's Return Format setting. Pass `false` as the third argument to retrieve the stored value without return formatting:
+
+```php
+$storedPhone = get_field('contact_phone', $postId, false);
+```
+
+## Phone field settings
+
+| Setting | Default | Choices |
+| --- | --- | --- |
+| Default Region | `SE` | Supported ISO alpha-2 region codes |
+| Display Format | `auto` | `auto`, `national`, `international`, `e164` |
+| Return Format | `e164` | `e164`, `national`, `international`, `array` |
+
+Automatic display is national for Swedish numbers only when Default Region is `SE`; otherwise it is international, retaining the country code for safe resaving. The array return contains `e164`, `national`, `international`, integer `country_code` and `region`.
+
+An exposed ACF field group follows ACF REST conventions: `acf_format=light` returns the stored value; `acf_format=standard` uses Return Format. This plugin does not enable field-group REST exposure.
+
+## Behavior and limitations
+
+Storage is always E.164 for accepted non-empty values. Validation checks characters before libphonenumber's numbering rules. Leading `00` means international regardless of Default Region. Validation does **not** establish that a number exists, is reachable or belongs to its submitter. ACF owns required-value handling.
+
+Empty and invalid/unparseable legacy values are returned unchanged for every Return Format and display policy; they are never turned into a valid-looking phone array. Invalid programmatic `update_field()` calls return `false` without changing stored value/reference metadata. Empty updates follow ACF's normal clearing/deletion semantics.
+
+English source strings are the fallback; Swedish (`sv_SE`) is bundled. WordPress language packs take precedence. ACF caches translated field-type labels and descriptions when it initializes them, so they are not refreshed by a later locale switch within the same request. Validation messages use the current locale.
+
+## Development
+
+Development requires PHP 8.3+ with curl, dom, mbstring, mysqli, xml and xmlwriter, Composer 2, curl CLI and tar. MariaDB is required for integration tests only.
+
+For a development checkout:
 
 ```sh
 composer install
 composer test
-composer setup:tests
-composer lint
 ```
 
-`composer test` and `composer test:unit` run behavior tests without WordPress or a database. `composer setup:tests` downloads checksum-verified WordPress and ACF archives to `.cache/tests/`; it does not change a database.
+### Commands
 
-`composer lint` runs Mago linting and static analysis on the plugin and tests. Run `composer setup:tests` first so the analyzer can resolve WordPress/ACF symbols. Mago's Composer launcher downloads its platform binary on first use, so initial execution requires GitHub Releases access.
+Run these from the repository root:
 
-Use `composer format` to format PHP.
+| Command | Purpose |
+| --- | --- |
+| `composer install` | Install development dependencies. |
+| `composer test` | Run unit tests without WordPress or a database. |
+| `composer setup:tests` | Download checksum-verified WordPress and ACF test dependencies to `.cache/tests/`; does not change a database. |
+| `composer test:integration` | Run integration tests; see the database setup below. |
+| `composer test:all` | Run unit and integration tests. |
+| `composer lint` | Run linting and static analysis; run `composer setup:tests` first. |
+| `composer format` | Format PHP. |
+| `composer i18n` | Update translation catalogs; see Translations below. |
 
-## Integration database
+The Mago launcher downloads its platform binary on first use and requires GitHub Releases access.
 
-Create a dedicated disposable database and a separate password-protected test account. Grant that account privileges on the test database. Exclusive access is not required: inherited PUBLIC rights on `test` and `test_%` are accepted for the local environment. Tests must still use only the designated database.
+### Integration tests
+
+Create a dedicated disposable MariaDB database and a separate password-protected test account with privileges on that database. Inherited PUBLIC rights on `test` and `test_%` are accepted locally; tests must use only the designated database.
 
 Keep the connection in a private INI file outside version control with permissions 0600:
 
@@ -45,70 +100,22 @@ password="YOUR_TEST_PASSWORD"
 database=YOUR_DISPOSABLE_DATABASE
 ```
 
-**The WordPress harness can delete and recreate test tables. Never use an existing site database.** The configured test-table prefix is `acf_phone_tests_`.
+**The WordPress harness can delete and recreate test tables. Never use an existing site database.** The test-table prefix is `acf_phone_tests_`.
 
 ```sh
 export ACF_TEST_DB_CONFIG=/absolute/path/to/private-client.ini
 export ACF_TEST_DB_CONFIRM=YOUR_DISPOSABLE_DATABASE
+composer setup:tests
 composer test:integration
-composer test:all
 ```
 
-The bootstrap rejects missing or malformed configuration, an administrator named `root`, and a confirmation that does not exactly match the configured database name. It does not provision databases or alter grants.
+The bootstrap rejects missing or malformed configuration, an administrator named `root`, and a confirmation that does not exactly match the configured database name. It does not provision databases or alter grants. `composer test:integration` runs the WordPress lifecycle without ACF and then the phone-field tests with ACF in separate PHP processes.
 
-`composer test:integration` runs two separate PHP processes: the unmodified WordPress lifecycle without ACF, then the production phone field with real ACF validation, E.164 save/read behavior, foreign-number rendering/resaving, REST formatting/schema and teardown. Phone-rule and format matrices run only in the fast unit suite.
-
-Optional `WP_TESTS_DIR` points to `tests/phpunit` in a full wordpress-develop checkout; optional `ACF_PLUGIN_FILE` points to ACF's `acf.php`.
+Optionally, `WP_TESTS_DIR` can point to `tests/phpunit` in a full wordpress-develop checkout, and `ACF_PLUGIN_FILE` to ACF's `acf.php`.
 
 ## Translations
 
-English source strings are the fallback; Swedish (`sv_SE`) is bundled in `languages/`. At `init` the plugin registers its bundled language directory with WordPress, so it works from either a normal plugin directory or a nested MU-plugin directory. WordPress language packs take precedence. No translation tools are needed at runtime. ACF translates field-type labels/descriptions when it initializes them; those cached metadata are not refreshed by a later locale switch within the same request. Validation messages use the current locale.
-
-To maintain the catalog, install WP-CLI with its `i18n` commands (no WordPress installation is needed for these commands), then run from the repository root:
-
-```sh
-composer i18n
-```
-
-This extracts the main plugin file and `source/php` into the POT, merges it into the Swedish PO without discarding existing translations, and compiles the MO. Edit `languages/acf-phone-number-field-sv_SE.po`, preserving placeholders and contexts, then run `composer i18n` again to compile the changes. Review the POT and PO diff for new, fuzzy or obsolete entries and check in all three files. This is a manual command, not an install hook.
-
-`composer test:integration` exercises the registered path, bundled MO, a Swedish field label and validation message, and English fallback through real WordPress. To check an installed copy, activate Swedish and confirm the phone field label and an invalid-number message; repeat with English to check fallback. For a nested MU installation, load the plugin through the site's MU loader before checking in the same way.
-
-## Phone field settings
-
-| Setting | Default | Choices |
-| --- | --- | --- |
-| Default Region | `SE` | Supported ISO alpha-2 region codes |
-| Display Format | `auto` | `auto`, `national`, `international`, `e164` |
-| Return Format | `e164` | `e164`, `national`, `international`, `array` |
-
-Automatic display is national for Swedish numbers only when Default Region is `SE`; otherwise it is international, retaining the country code for safe resaving. Storage is always E.164 for accepted non-empty values; `get_field('contact_phone', $postId, false)` retrieves it without return formatting.
-
-The array return contains `e164`, `national`, `international`, integer `country_code` and `region`. An exposed ACF field group follows ACF REST conventions: `acf_format=light` returns the stored value; `acf_format=standard` uses Return Format. This plugin does not enable field-group REST exposure.
-
-Empty and invalid/unparseable legacy values are returned unchanged for every Return Format and display policy; they are never turned into a valid-looking phone array. Invalid programmatic `update_field()` calls return `false` without changing stored value/reference metadata. Empty updates follow ACF's normal clearing/deletion semantics.
-
-Validation checks characters before libphonenumber's numbering rules. Leading `00` means international regardless of Default Region. Validation does **not** establish that a number exists, is reachable or belongs to its submitter. ACF owns required-value handling.
-
-## Deployment build hook
-
-`php build.php` installs production Composer dependencies and generates an authoritative optimized autoloader. It runs from the plugin directory even when invoked from elsewhere. It does not build frontend assets. For development and tests, use `composer install` instead: the production build omits development dependencies.
-
-The parent deployment discovers this hook and may pass:
-
-- `--no-composer`: skip dependency installation when the parent provides the shared autoloader.
-- `--install-npm`: accepted for parent-build compatibility; no action is needed for this PHP-only package.
-- `--cleanup`: remove Git metadata, test caches, tests, tool configuration and build/dependency manifests from the build copy, retaining runtime code, licenses and installed runtime dependencies.
-
-**Run `--cleanup` only in a disposable build copy, never in your development checkout.** This hook does not create a release ZIP or verify the MU-plugin loader.
-
-## CI and scope
-
-`.github/workflows/tests.yml` configures pull-request checks using the same Composer commands and a disposable MariaDB service. The service container runs on GitHub; local verification uses native PHP/MariaDB.
-
-A hosted Actions run is still required to verify the runner, service image and Actions environment. Devcontainer verification, browser tests, ACF Pro, MU-loader verification and release packaging are deferred.
-
-The official WordPress harness failed under PHPUnit 11 and 12 because it calls the removed `parseTestMethodAnnotations()` method. PHPUnit 9.6 / Polyfills 1.x passed the real lifecycle without a compatibility adapter or upstream patches.
+To update the translation catalog, install WP-CLI with its `i18n` commands and run `composer i18n` from the repository root. Edit `languages/acf-phone-number-field-sv_SE.po`, then run `composer i18n` again. Review and commit the resulting POT, PO and MO files.
 
 ## License
 
