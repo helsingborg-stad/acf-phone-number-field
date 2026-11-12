@@ -25,7 +25,7 @@ Input may use different formats, but it must pass validation before it is stored
 
 ## Usage
 
-In an ACF field group, add a phone number field (`municipio_phone_number`) and configure its settings. For a field named `contact_phone`, retrieve its formatted value using ACF:
+In an ACF field group, add a phone number field (`phone_number`) and configure its settings. For a field named `contact_phone`, retrieve its formatted value using ACF:
 
 ```php
 $phone = get_field('contact_phone', $postId);

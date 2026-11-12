@@ -18,7 +18,7 @@ final class FieldLifecycleTest extends \WP_UnitTestCase
                 'key' => 'field_phone',
                 'name' => 'contact_phone',
                 'label' => 'Phone',
-                'type' => 'municipio_phone_number',
+                'type' => 'phone_number',
             ], $settings)],
             'location' => [[['param' => 'post_type', 'operator' => '==', 'value' => 'post']]],
         ]);
@@ -29,7 +29,7 @@ final class FieldLifecycleTest extends \WP_UnitTestCase
 
     public function testRegistrationAndValidationThroughAcf(): void
     {
-        self::assertInstanceOf(Field::class, acf_get_field_type('municipio_phone_number'));
+        self::assertInstanceOf(Field::class, acf_get_field_type('phone_number'));
         $field = $this->phoneField();
         self::assertTrue(acf_validate_value('070-123 45 67', $field, 'acf[field_phone]'));
         self::assertFalse(acf_validate_value('070ABC4567', $field, 'acf[field_phone]'));

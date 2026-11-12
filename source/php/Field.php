@@ -12,7 +12,7 @@ final class Field extends \acf_field_text
     public function initialize(): void
     {
         parent::initialize();
-        $this->name = 'municipio_phone_number';
+        $this->name = 'phone_number';
         $this->label = __('Phone number', 'acf-phone-number-field');
         $this->defaults = [
             'default_value' => '',
